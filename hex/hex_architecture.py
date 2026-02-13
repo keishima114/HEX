@@ -9,15 +9,17 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from timm import create_model
-from musk import utils, modeling
+from musk import modeling
 
 
 class CustomModel(nn.Module):
-    def __init__(self, visual_output_dim, num_outputs):
+    def __init__(self, visual_output_dim, num_outputs, load_musk_from_hf=True):
         super(CustomModel, self).__init__()
         model_config = "musk_large_patch16_384"
         model_musk = create_model(model_config, vocab_size=64010)
-        utils.load_model_and_may_interpolate("hf_hub:xiangjx/musk", model_musk, 'model|module', '')
+        if load_musk_from_hf:
+            from musk import utils
+            utils.load_model_and_may_interpolate("hf_hub:xiangjx/musk", model_musk, 'model|module', '')
         self.visual = model_musk
         self.regression_head = nn.Sequential(
             nn.Linear(visual_output_dim, 256),
